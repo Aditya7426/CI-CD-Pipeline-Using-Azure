@@ -1,0 +1,53 @@
+version: '3.4'
+
+services:
+  redis:
+    image: redis/redis-stack:latest
+    restart: always
+    ports:
+      - 6379:6379
+  catalog:
+    image: packt-store-catalog:latest
+    build:
+      context: e2e/apps/catalog
+      dockerfile: ./Dockerfile
+    environment:
+      PORT: 5050
+    ports:
+      - 5050:5050
+  cart:
+    image: packt-store-cart:latest
+    build:
+      context: e2e/apps/cart
+      dockerfile: ./Dockerfile
+    depends_on:
+      - redis
+    environment:
+      NODE_ENV: production
+      PORT: 5075
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - 5075:5075
+  checkout:
+    image: packt-store-checkout:latest
+    build:
+      context: e2e/apps/checkout
+      dockerfile: ./Dockerfile
+    environment:
+      ASPNETCORE_URLS: "http://+:5015"
+      PORT: 5015
+    ports:
+      - 5015:5015
+  frontend:
+    image: packt-store-frontend:latest
+    build:
+      context: e2e/apps/frontend
+      dockerfile: ./Dockerfile
+    environment:
+      PORT: 5030
+      CATALOG_API_URL: http://localhost:5050/
+      CART_API_URL: http://localhost:5075/
+      CHECKOUT_API_URL: http://localhost:5015/
+    ports:
+      - 5030:80

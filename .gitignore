@@ -1,0 +1,7 @@
+# Terraform
+.terraform*
+*.tfplan*
+*.tfstate*
+*b64
+*.jks
+*GoogleService*.plist
